@@ -30,9 +30,13 @@ def save_last_id(video_id):
         json.dump({"last_id": video_id}, f)
 
 def should_skip(title: str) -> bool:
-    if SKIP_SHORTS_BY_TITLE and "#shorts" in title.lower():
-        return True
-    return False
+    # convert title to lowercase once
+    lower = title.lower()
+
+    # keywords/hashtags to skip
+    skip_keywords = ["#shorts", "#memes", "#gamedev", "#gamedevelopment"]
+
+    return any(k in lower for k in skip_keywords)
 
 def post_to_discord(title, url, thumbnail):
     # Build content & allowed mentions safely
