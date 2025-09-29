@@ -34,23 +34,22 @@ def should_skip(title: str) -> bool:
     lower = title.lower()
 
     # keywords/hashtags to skip
-    skip_keywords = ["#shorts", "#memes", "#gamedev", "#gamedevelopment"]
+    skip_keywords = ["#shorts", "#short", "#tutorial", "#memes", "#meme", "#gamedev", "#gamedevelopment"]
 
     return any(k in lower for k in skip_keywords)
 
 def post_to_discord(title, url, thumbnail):
-    # Build content & allowed mentions safely
-    mentions = []
-    content_bits = []
+    # Role IDs (replace with your actual IDs)
+    STREAM_ROLE_ID = "1422065772183683072"  # @StreamEnjoyer
+    VIDEO_ROLE_ID = "1422065414023675965"   # @VideoEnjoyer
 
-    if PING_EVERYONE:
-        content_bits.append("@everyone")
-        mentions = ["everyone"]
-    if PING_ROLE and ROLE_ID.isdigit():
-        content_bits.append(f"<@&{ROLE_ID}>")
+    # Decide which role to ping
+    if "live" in title.lower():
+        role_id = STREAM_ROLE_ID
+    else:
+        role_id = VIDEO_ROLE_ID
 
-    content_bits.append(f"**New video:** {title}\n{url}")
-    content = " ".join(content_bits)
+    content = f"<@&{role_id}> **New:** {title}\n{url}"
 
     payload = {
         "content": content,
@@ -60,10 +59,10 @@ def post_to_discord(title, url, thumbnail):
             "image": {"url": thumbnail}
         }],
         "allowed_mentions": {
-            "parse": mentions,
-            "roles": [ROLE_ID] if (PING_ROLE and ROLE_ID.isdigit()) else []
+            "roles": [role_id]  # explicitly allow pinging this role
         }
     }
+
     r = requests.post(WEBHOOK_URL, json=payload, timeout=15)
     r.raise_for_status()
 
